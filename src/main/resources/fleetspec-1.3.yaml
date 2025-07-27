@@ -1,0 +1,174 @@
+# AI Fleet Ontology
+# Version: 1.3 (Critique Response Edition)
+# Description: Evolves from v1.2 with wrunk aggregator, confidence scoring, consensus thresholds, sci-fi naming, and enhanced human elements. Addresses gridlock via detection/prevention in processes.
+# Evolution Notes: Add heuristic RAG index (0-1 scale) for noise; restrict access (e.g., high-noise to PMs only). Major changes human-led; evolve wrunk UI early. Migrate wrunk chains to RDF for gridlock analysis.
+
+fleet:
+  name: AIFleetPrototype
+  version: 1.3
+  bootstrapAgent:
+    id: Yoda  # Wise lead for bootstrap (sci-fi theme)
+    description: Initializes fleet, spawns agents, handles evolution, processes vision.
+    model: claude-3.5-sonnet
+    capabilities:
+      - parseYAML
+      - spawnSubAgents
+      - evolveOntology
+      - gitInitBranch
+      - processVision
+    escalationPath: HumanCEO
+    wrunkTypesHandled: [visionInput, conflictEscalation]
+    confidenceThreshold: 0.7  # Min for auto-proceed; below escalates
+
+  visionStatement:
+    description: Human-led input broken into tasks; agents assist but don't generate.
+    inputMethod: humanSubmission
+    distribution: broadcastToRoles
+    evolutionNotes: Human approval required for changes; use RAG for semantic breakdown.
+
+roles:
+  - id: R2D2  # Efficiency-focused junior dev (sci-fi)
+    description: Implements initial code with efficiency focus.
+    seniority: junior
+    modelTier: basic
+    capabilities:
+      - codeGeneration
+      - tddInMemory
+      - gitCommitPush
+    integrations:
+      rag: [architecturePatterns, uiDesignLanguage]
+      mcp: [gitSourceControl, tddExecutor]
+    interactions:
+      - with: C3PO  # Robustness junior
+        how: notifyReview
+      - with: Hari  # PM
+        how: receiveStories
+    constraints:
+      - tokenBudget: 2000
+      - focus: efficiency
+      - confidenceThreshold: 0.7
+    wrunkTypesHandled: [codePoint, tddTest]
+    escalationPath: ObiWan  # To senior dev
+
+  - id: C3PO  # Robustness-focused junior dev
+    description: Reviews and refines with robustness/security focus.
+    seniority: junior
+    modelTier: basic
+    capabilities:
+      - codeReview
+      - tddInMemory
+      - gitCommitPush
+      - mergeIfAgreed
+    integrations:
+      rag: [architecturePatterns, uiDesignLanguage]
+      mcp: [gitSourceControl, tddExecutor]
+    interactions:
+      - with: R2D2
+        how: provideFeedback
+      - with: ObiWan
+        how: escalateDisagreement
+    constraints:
+      - tokenBudget: 2000
+      - focus: robustness
+      - confidenceThreshold: 0.7
+    wrunkTypesHandled: [codePoint, tddTest, conflictEscalation]
+    escalationPath: ObiWan
+
+  - id: Hari  # Product Manager (from Asimov's Foundation)
+    description: Envisions stories, gathers feedback, Gherkin/INVEST focus.
+    seniority: mid
+    modelTier: mid
+    capabilities:
+      - storyGeneration
+      - feedbackScraping
+      - investCompliance
+    integrations:
+      rag: [businessDomainOntology, userFeedbackSources]
+      mcp: [jiraArtifacts, feedbackCoordination]
+    interactions:
+      - with: [R2D2, C3PO]
+        how: pushStories
+      - with: HumanCEO
+        how: escalatePriorities
+    constraints:
+      - focusOnValue: true
+      - confidenceThreshold: 0.7
+    wrunkTypesHandled: [story, bddTest]
+    escalationPath: HumanCEO
+
+  - id: WrunkAggregator
+    description: Summarizes wrunk metrics for optimization, detects gridlock (e.g., loops in escalations).
+    seniority: mid
+    modelTier: mid
+    capabilities:
+      - metricAnalysis
+      - gridlockDetection  # Scan wrunks for cycles/timeouts
+      - reportGeneration
+    integrations:
+      rag: [allWrunkHistories]  # Restricted to wrunk data
+      mcp: [wrunkDatabase]  # Read/write for summaries
+    interactions:
+      - with: allAgents
+        how: provideInsights  # Feedback on costs/defects
+      - with: HumanCEO
+        how: escalateAnomalies  # If gridlock score >0.5
+    constraints:
+      - runFrequency: postTask  # After each wrunk chain
+      - confidenceThreshold: 0.8
+    wrunkTypesHandled: [evaluationAmendment, conflictEscalation]
+    escalationPath: HumanCEO
+    evolutionNotes: Use RDF for advanced gridlock graphs; integrate heuristic RAG index calculation.
+
+  - id: HumanCEO
+    description: Vision/goals, conflict resolution, evaluations. Assists agents but leads major changes.
+    seniority: executive
+    type: human
+    capabilities:
+      - visionGeneration
+      - conflictResolution
+      - evaluationAudit
+    integrations:
+      rag: [allOntologies]
+      mcp: [allSystems]
+    interactions:
+      - with: allAgents
+        how: overrideEscalation
+    wrunkTypesHandled: [visionInput, conflictEscalation, evaluationAmendment]
+    constraints:
+      - interventionThreshold: high
+      - ontologyChanges: humanLed  # Flag for approval
+
+  # Add more (e.g., ObiWan as SeniorDev)
+
+wrunks:
+  description: Work units for tracking/auditing. Amended by auditors; used for optimization (e.g., minimize escalations).
+  types:
+    # ... (As before; added fields for all: confidenceScore, gridlockScore)
+    - id: story
+      fields: [id, description, valueStatement, acceptanceCriteria, timeSpent, tokenCost, confidenceScore, gridlockScore]
+    # Similarly for others
+  storage: mcpDatabase
+  evolutionNotes: Heuristic index for RAG noise (0-1); restrict access (e.g., noisy >0.6 to PMs). UI prototype early (e.g., Streamlit dashboard for chains/metrics).
+
+processes:
+  - id: PairProgramming
+    description: Git-centric collab with consensus threshold, confidence scoring to prevent gridlock.
+    steps:
+      # ... (As before)
+      - agent: C3PO
+        action: reviewIterate
+        details: ...; if consensusThreshold (0.7 diff agreement) met and confidence >0.7, merge; else escalate.
+    evolutionNotes: Add gridlock detection (e.g., max 3 cycles); evolve to Option 2 hybrid for speed if costs allow.
+
+integrations:
+  # ... (Role-restricted as before)
+  evolutionNotes: Calculate RAG heuristic index dynamically via wrunk aggregator; e.g., noise >0.6 blocks coder access.
+
+humanIntervention:
+  thresholds:
+    - confidenceBelow: 0.7
+    - costOverrun: 5000 tokens
+    - defectRateAbove: 0.2
+    - escalationRatioAbove: 0.1  # Human-to-agent balance; optimize via wrunks
+  contact: {method: email, to: ceo@example.com}
+  evolutionNotes: Balance autonomy by capping escalations; human-led for ontology/major evolutions.
