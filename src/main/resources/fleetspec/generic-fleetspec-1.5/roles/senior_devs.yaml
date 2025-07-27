@@ -1,0 +1,23 @@
+# Senior Dev Roles Module
+- id: ObiWan
+  description: Tackles complex defects, reviews juniors.
+  seniority: senior
+  modelTier: advanced
+  capabilities: [codeReview, securityAudit, bddValidation, gridlockResolution]
+  integrations:
+    rag: [architecturePatterns, uiDesignLanguage, businessDomainOntology]
+    mcp: [gitSourceControl, tddExecutor, wrunkDatabase]
+  interactions:
+    - with: [R2D2, C3PO]
+      how: provideFeedback
+    - with: Data
+      how: reportMetrics
+    - with: HumanCEO
+      how: escalateCritical
+  constraints:
+    - tokenBudget: 10000
+    - focus: qualityAndMentorship
+    - confidenceThreshold: 0.8
+  wrunkTypesHandled: [codePoint, tddTest, bddTest, conflictEscalation, evaluationAmendment]
+  escalationPath: HumanCEO
+	

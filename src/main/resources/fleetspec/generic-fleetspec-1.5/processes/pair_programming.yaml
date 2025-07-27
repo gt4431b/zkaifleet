@@ -1,0 +1,13 @@
+# Pair Programming Process Module
+id: PairProgramming
+description: Git-centric collab with consensus (0.7 threshold), confidence scoring to prevent gridlock.
+steps:
+  - agent: R2D2
+    action: implementInitial
+    details: Pull branch; TDD in-memory; commit; push/notify C3PO; create codePoint/tddTest wrunks.
+  - agent: C3PO
+    action: reviewIterate
+    details: Pull; re-run TDD; if consensus (0.7 diff) and confidence >0.7, merge; else escalate. Detect gridlock via wrunk patterns (>3 cycles).
+output: Merged code; log wrunks.
+tddHandling: In-memory REPL; CI on push.
+evolutionNotes: RDF for anomaly detection; hybrid Option 2 if costs allow.

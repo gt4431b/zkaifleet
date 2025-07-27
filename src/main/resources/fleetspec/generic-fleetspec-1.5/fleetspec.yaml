@@ -1,0 +1,35 @@
+# AI Fleet Ontology - Top-Level
+# Version: 1.5 (Modular Edition)
+# Description: Central spec with references to sub-files. Supports flexible URIs (classpath://, file:///, relative, etc.). Evolves from v1.4 by modularizing for bite-sized management.
+# Evolution Notes: Add proprietary protocols (e.g., fleet-catalog://) for scaled registries. Human approval for major changes.
+
+fleet:
+  name: AIFleetPrototype
+  version: 1.5
+  bootstrapAgent:
+    - classpath://./bootstrap_agent.yaml  # Or file:///path/to/bootstrap_agent.yaml
+
+  visionStatement:
+    - ./vision_statement.yaml  # Relative path
+
+  roles:
+    - classpath://roles/junior_devs.yaml
+    - file:///roles/senior_devs.yaml  # Example mix of protocols
+    - ./roles/pm_roles.yaml
+    - classpath://roles/aggregator.yaml
+    - ./roles/human_roles.yaml  # Add more as arrays
+
+  wrunks:
+    - classpath://wrunks/types.yaml
+    - ./wrunks/storage.yaml  # Split if needed
+
+  processes:
+  - file:///processes/pair_programming.yaml
+
+  integrations:
+  - classpath://integrations/mcp_rag.yaml
+  evolutionNotes: Noise >0.6 restricts (e.g., coders block high-noise); evolve to DCAT for catalogs.
+  description: Central access details; roles restrict subsets.
+
+  humanIntervention:
+  - ./human_intervention/thresholds.yaml

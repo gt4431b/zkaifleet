@@ -1,0 +1,3 @@
+# Wrunk Storage Module
+storage: mcpDatabase
+evolutionNotes: Heuristic RAG index (0-1); UI early for management.

@@ -1,0 +1,13 @@
+# Bootstrap Agent Module
+id: Yoda
+description: Initializes fleet, spawns agents, handles evolution, processes vision.
+model: claude-3.5-sonnet
+capabilities:
+  - parseYAML
+  - spawnSubAgents
+  - evolveOntology
+  - gitInitBranch
+  - processVision
+escalationPath: HumanCEO
+wrunkTypesHandled: [visionInput, conflictEscalation]
+confidenceThreshold: 0.7

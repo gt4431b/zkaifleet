@@ -1,0 +1,6 @@
+# Vision Statement Module
+description: Human-led input broken into tasks; agents assist.
+inputMethod: humanSubmission
+distribution: broadcastToRoles
+evolutionNotes: Human approval for changes; RAG for breakdown.
+id: VisionStatement

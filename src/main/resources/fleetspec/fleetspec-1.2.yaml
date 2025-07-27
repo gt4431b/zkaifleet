@@ -1,0 +1,168 @@
+# AI Fleet Ontology
+# Version: 1.2 (Wrunk Integration and Human Elements Edition)
+# Description: Defines the fleet structure with Git-centric interactions, now incorporating wrunks (work units) for tracking, auditing, and optimization. Human roles are explicitly included for conflict resolution, vision generation, and evaluations. Agent IDs use human first names for shorthand. Evolves from v1.1 by adding wrunk types, vision input, and human integration.
+# Evolution Notes: YAML for bootstrap; migrate wrunk audits to RDF/OWL (e.g., using BFO for process tracking and DCAT for data catalogs of wrunk artifacts). Agents can propose evolutions via MCP updates to enhance scalability and self-optimization.
+
+fleet:
+  name: AIFleetPrototype
+  version: 1.2
+  bootstrapAgent:
+    id: BootstrapLead  # Human-name style for lead agent
+    description: Initializes the fleet from this ontology, spawns initial agents, handles self-evolution, and processes vision statements.
+    model: claude-3.5-sonnet
+    capabilities:
+      - parseYAML
+      - spawnSubAgents
+      - evolveOntology
+      - gitInitBranch  # MCP: Create feature branches
+      - processVision  # Ingest and distribute vision statements
+    escalationPath: HumanCEO
+    wrunkTypesHandled: [visionInput, conflictEscalation]  # Produces wrunks for bootstrap logs
+
+  visionStatement:
+    description: High-level input for fleet execution, e.g., "Build a scalable multi-agent system prototype focused on ethical AI augmentation."
+    inputMethod: humanSubmission  # Via MCP (e.g., API or file upload)
+    distribution: broadcastToRoles  # Bootstrap agent breaks it into tasks/stories for PM/Dev agents
+    evolutionNotes: Evolve to RAG-queryable ontology for semantic breakdown; use DCAT for cataloging vision artifacts.
+
+roles:
+  # Agent roles with human first names as IDs, restricted integrations, and wrunk types they produce/handle.
+  - id: Alex  # Efficiency-focused junior dev
+    description: Implements initial code with focus on efficiency.
+    seniority: junior
+    modelTier: basic
+    capabilities:
+      - codeGeneration
+      - tddInMemory  # Run tests via REPL
+      - gitCommitPush  # MCP to Git
+    integrations:
+      rag: [architecturePatterns, uiDesignLanguage]  # Dev-focused; no business domain to reduce overload
+      mcp: [gitSourceControl, tddExecutor]  # Code and tests only
+    interactions:
+      - with: Daneel  # PM agent
+        how: receiveStories  # Pull Gherkin via MCP
+      - with: Bob  # Robustness junior dev
+        how: notifyReview  # Post PR comment via MCP
+    constraints:
+      - tokenBudget: 2000
+      - focus: efficiency
+    wrunkTypesHandled: [codePoint, tddTest]  # Produces code commits and test results as wrunks
+    escalationPath: Charlie  # To senior dev
+
+  - id: Bob  # Robustness-focused junior dev
+    description: Reviews and refines code with focus on robustness/security.
+    seniority: junior
+    modelTier: basic
+    capabilities:
+      - codeReview
+      - tddInMemory
+      - gitCommitPush
+      - mergeIfAgreed  # API call if consensus
+    integrations:
+      rag: [architecturePatterns, uiDesignLanguage]  # Same as Alex; restricted to dev needs
+      mcp: [gitSourceControl, tddExecutor]
+    interactions:
+      - with: Alex
+        how: provideFeedback  # Commit diffs/comments
+      - with: Charlie  # Senior dev
+        how: escalateDisagreement
+    constraints:
+      - tokenBudget: 2000
+      - focus: robustness
+    wrunkTypesHandled: [codePoint, tddTest, conflictEscalation]  # Adds escalation wrunks
+    escalationPath: Charlie
+
+  - id: Daneel  # Product Manager agent
+    description: Envisions user stories, gathers feedback, formats in Gherkin with INVEST focus.
+    seniority: mid
+    modelTier: mid
+    capabilities:
+      - storyGeneration
+      - feedbackScraping  # Via web tools or MCP
+      - investCompliance
+    integrations:
+      rag: [businessDomainOntology, userFeedbackSources]  # Business-focused; no architecture to avoid overload
+      mcp: [jiraArtifacts, feedbackCoordination]  # Stories and feedback only
+    interactions:
+      - with: [Alex, Bob]  # Dev agents
+        how: pushStories  # MCP: Update artifacts
+      - with: HumanCEO
+        how: escalatePriorities  # If value unclear
+    constraints:
+      - focusOnValue: true
+    wrunkTypesHandled: [story, bddTest]  # Produces stories and BDD scenarios
+    escalationPath: HumanCEO
+
+  # Human roles: Explicitly defined for non-AI tasks; no modelTier, but with MCP/RAG access for oversight.
+  - id: HumanCEO
+    description: Provides vision, resolves high-level conflicts, generates goals, evaluates audits.
+    seniority: executive
+    type: human  # Flag to indicate non-AI
+    capabilities:
+      - visionGeneration
+      - conflictResolution
+      - evaluationAudit  # Amend wrunks post-process
+    integrations:
+      rag: [allOntologies]  # Full access for oversight
+      mcp: [allSystems]  # Can intervene anywhere
+    interactions:
+      - with: allAgents
+        how: overrideEscalation  # Humans receive notifications via email/Slack
+    wrunkTypesHandled: [visionInput, conflictEscalation, evaluationAmendment]  # Amends wrunks for audits
+    constraints:
+      - interventionThreshold: high  # Only on escalation
+
+  # Add more roles (e.g., Charlie as SeniorDev) as needed.
+
+wrunks:
+  description: Work units tracking inputs/outputs for auditing, optimization, and evolution. Records include time, token cost, gitCommitId, and are amendable by downstream agents/humans.
+  types:
+    - id: story
+      description: User story output from PM, input to devs. Gherkin format with INVEST compliance.
+      fields: [id, description, valueStatement, acceptanceCriteria, timeSpent, tokenCost]
+    - id: codePoint
+      description: Code implementation or review artifact.
+      fields: [gitCommitId, codeDiff, rationale, timeSpent, tokenCost, defectCount]
+    - id: tddTest
+      description: Test-Driven Development result (in-memory or CI).
+      fields: [testCode, results, passRate, timeSpent, tokenCost]
+    - id: bddTest
+      description: Behavior-Driven Development scenario validation.
+      fields: [gherkinScenario, executionResults, valueDelivery, timeSpent, tokenCost]
+    - id: conflictEscalation
+      description: Record of unresolved issues escalated to senior/human.
+      fields: [issueDescription, agentsInvolved, resolution, timeSpent, tokenCost]
+    - id: visionInput
+      description: High-level goal from HumanCEO, broken into tasks.
+      fields: [statement, breakdown, priority, timeSpent, tokenCost]
+    - id: evaluationAmendment
+      description: Audit amendments by auditors (e.g., security review).
+      fields: [originalWrunkId, amendments, evaluator, timeSpent, tokenCost]
+  storage: mcpDatabase  # E.g., Postgres via MCP for amends; RAG for queries
+  evolutionNotes: Track wrunks in RDF for semantic audits (e.g., BFO for process chains); use for optimization metrics.
+
+processes:
+  - id: PairProgramming
+    description: Asynchronous collaboration on Git-managed code using Option 1. TDD in-memory for efficiency. Produces wrunks for each step.
+    steps:
+      - agent: Alex  # Efficiency junior
+        action: implementInitial
+        details: Pull branch; TDD in-memory; commit with rationale; push and notify Bob; create codePoint and tddTest wrunks.
+      - agent: Bob  # Robustness junior
+        action: reviewIterate
+        details: Pull updates; re-run TDD in-memory; commit fixes/comments; if agreed, merge and create evaluationAmendment wrunk; else escalate and create conflictEscalation wrunk.
+      - output: Merged code; log wrunks to MCP database.
+      - tddHandling: In-memory REPL (no commit per test); full CI on final push.
+    evolutionNotes: Evolve to shared memory hybrid if latency issues; use RDF for wrunk metric analysis.
+
+integrations:
+  # ... (As before, with role restrictions enforced per agent)
+  evolutionNotes: Restrict per role to reduce overload; e.g., PMs get business RAG, devs get architecture.
+
+humanIntervention:
+  thresholds:
+    - confidenceBelow: 0.7
+    - costOverrun: 5000 tokens
+    - defectRateAbove: 0.2  # Based on wrunk audits
+  contact: {method: email, to: ceo@example.com}
+  evolutionNotes: Humans amend wrunks for final evaluations; integrate with vision for goal alignment.

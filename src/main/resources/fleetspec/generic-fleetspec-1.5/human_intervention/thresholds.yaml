@@ -1,0 +1,9 @@
+# Human Intervention Module
+thresholds:
+  - confidenceBelow: 0.7
+  - costOverrun: 5000 tokens
+  - defectRateAbove: 0.2
+  - escalationRatioAbove: 0.1
+  - gridlockScoreAbove: 0.5  # Via aggregator
+contact: {method: email, to: ceo@example.com}
+evolutionNotes: Cap escalations for autonomy; human-led evolutions.

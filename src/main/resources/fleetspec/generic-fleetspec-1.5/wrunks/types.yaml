@@ -1,0 +1,19 @@
+# Wrunk Types Module
+description: Work units for tracking. Detect gridlock via patterns.
+types:
+  - id: story
+    fields: [id, description, valueStatement, acceptanceCriteria, timeSpent, tokenCost, confidenceScore, gridlockScore]
+  - id: codePoint
+    fields: [gitCommitId, codeDiff, rationale, timeSpent, tokenCost, defectCount, confidenceScore, gridlockScore]
+  - id: tddTest
+    fields: [testCode, results, passRate, timeSpent, tokenCost, confidenceScore, gridlockScore]
+  - id: bddTest
+    fields: [gherkinScenario, executionResults, valueDelivery, timeSpent, tokenCost, confidenceScore, gridlockScore]
+  - id: conflictEscalation
+    fields: [issueDescription, agentsInvolved, resolution, timeSpent, tokenCost, confidenceScore, gridlockScore]
+  - id: visionInput
+    fields: [statement, breakdown, priority, timeSpent, tokenCost, confidenceScore, gridlockScore]
+  - id: evaluationAmendment
+    fields: [originalWrunkId, amendments, evaluator, timeSpent, tokenCost, confidenceScore, gridlockScore]
+evolutionNotes: RDF for noise/index calc; noise >0.6 restricts coders.
+storage: mcpDatabase  # E.g., Postgres via MCP for amends; RAG for queries

@@ -1,0 +1,9 @@
+# Integrations Module
+- type: mcp
+  git: {repo: "fleet-repo", api: "https://api.github.com", auth: token}
+  jira: {apiUrl: "https://your-jira.com", auth: oauth}
+  wrunkDatabase: {type: postgres, url: "jdbc:postgresql://host/db", auth: credentials}
+  description: For artifacts; cost is low (API ~free).
+- type: rag
+  vectorDb: qdrant  # For ontology queries
+  description: For knowledge; add heuristicIndex (noise calc via aggregator).

@@ -1,0 +1,39 @@
+# Junior Dev Roles Module
+- id: R2D2  # Efficiency
+  description: Implements initial code efficiently.
+  seniority: junior
+  modelTier: basic
+  capabilities: [codeGeneration, tddInMemory, gitCommitPush]
+  integrations:
+    rag: [architecturePatterns, uiDesignLanguage]
+    mcp: [gitSourceControl, tddExecutor]
+  interactions:
+    - with: C3PO
+      how: notifyReview
+    - with: Hari
+      how: receiveStories
+  constraints:
+    - tokenBudget: 2000
+    - focus: efficiency
+    - confidenceThreshold: 0.7
+  wrunkTypesHandled: [codePoint, tddTest]
+  escalationPath: ObiWan
+- id: C3PO  # Robustness
+  description: Reviews/refines for robustness.
+  seniority: junior
+  modelTier: basic
+  capabilities: [codeReview, tddInMemory, gitCommitPush, mergeIfAgreed]
+  integrations:
+    rag: [architecturePatterns, uiDesignLanguage]
+    mcp: [gitSourceControl, tddExecutor]
+  interactions:
+    - with: R2D2
+      how: provideFeedback
+    - with: ObiWan
+      how: escalateDisagreement
+  constraints:
+    - tokenBudget: 2000
+    - focus: robustness
+    - confidenceThreshold: 0.7
+  wrunkTypesHandled: [codePoint, tddTest, conflictEscalation]
+  escalationPath: ObiWan

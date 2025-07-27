@@ -1,0 +1,79 @@
+# AI Fleet Ontology
+# Version: 1.1 (Git-Centric Collaboration Edition)
+# Description: Defines fleet structure with focus on asynchronous, Git-based interactions for cost efficiency. Evolves from v1.0 by adding Option 1 details.
+# Evolution Notes: YAML for now; migrate interactions to RDF/OWL (e.g., using BFO for process relations) for semantic querying of histories. Use DCAT for cataloging Git artifacts.
+
+fleet:
+  name: AIFleetPrototype
+  version: 1.1
+  bootstrapAgent:
+    role: LeadBootstrapAgent
+    description: Initializes fleet, spawns agents, enforces Git-centric flows.
+    model: claude-3.5-sonnet
+    capabilities:
+      - parseYAML
+      - spawnSubAgents
+      - evolveOntology
+      - gitInitBranch  # MCP: Create feature branches
+    escalationPath: humanCEO
+
+roles:
+  - id: JuniorDevA
+    description: Efficiency-focused junior; implements initial code.
+    seniority: junior
+    modelTier: basic
+    capabilities:
+      - codeGeneration
+      - tddInMemory  # Run tests via REPL
+      - gitCommitPush  # MCP to Git
+    interactions:
+      - with: JuniorDevB
+        how: notifyReview  # Post PR comment via MCP
+    constraints:
+      - tokenBudget: 2000
+      - focus: efficiency
+
+  - id: JuniorDevB
+    description: Robustness-focused junior; reviews and refines.
+    seniority: junior
+    modelTier: basic
+    capabilities:
+      - codeReview
+      - tddInMemory
+      - gitCommitPush
+      - mergeIfAgreed  # API call if consensus
+    interactions:
+      - with: JuniorDevA
+        how: provideFeedback  # Commit diffs/comments
+      - with: SeniorDevAgent
+        how: escalateDisagreement
+    constraints:
+      - tokenBudget: 2000
+      - focus: robustness
+
+  # ... (Other roles as before)
+
+processes:
+  - id: PairProgramming
+    description: Asynchronous collaboration on Git-managed code using Option 1. TDD in-memory for efficiency.
+    steps:
+      - agent: JuniorDevA
+        action: implementInitial
+        details: Pull branch; TDD in-memory (write tests, code, refactor); commit with rationale; push and notify JuniorDevB via MCP (PR comment).
+      - agent: JuniorDevB
+        action: reviewIterate
+        details: Pull updates; re-run TDD in-memory; commit fixes/comments; if agreed (confidence >0.8), merge; else escalate.
+      - output: Merged code; log TDD results to commit notes.
+      - tddHandling: In-memory REPL (no commit per test); full CI on final push.
+    evolutionNotes: Evolve to shared memory (Option 2 hybrid) if latency becomes issue; add RDF for querying TDD histories (e.g., "What tests failed by agent?").
+
+integrations:
+  - type: mcp
+    git: {repo: "fleet-repo", api: "https://api.github.com", auth: token}
+    description: For commits, pulls, PRs. Cost Low (API calls ~free tier).
+  - type: rag
+    ontologyDb: qdrant  # For querying architecture patterns during TDD.
+  - evolutionNotes: Add AWS Lambda for in-memory TDD sandboxes; evolve logs to DCAT-cataloged datasets.
+
+humanIntervention:
+  # ... (As before, e.g., escalate on disagreement loops)

@@ -1,0 +1,112 @@
+# AI Fleet Ontology
+# Version: 1.0 (Bootstrap Edition)
+# Description: Defines the structure, roles, and interactions of the AI Fleet system. This YAML serves as the initial knowledge base, evolvable to RDF/OWL for semantic depth.
+# Evolution Notes: Start simple; agents can migrate sections (e.g., roles to BFO-grounded classes) via MCP updates. Use DCAT for future data cataloging of ontologies.
+
+fleet:
+  name: AIFleetPrototype
+  version: 1.0
+  bootstrapAgent:
+    role: LeadBootstrapAgent
+    description: Initializes the fleet from this ontology, spawns initial agents, and handles self-evolution.
+    model: claude-3.5-sonnet  # Or dynamic via Bedrock/Anthropic
+    capabilities:
+      - parseYAML
+      - spawnSubAgents
+      - evolveOntology  # MCP write access to update this file
+    escalationPath: humanCEO  # If bootstrap fails, notify human
+
+roles:
+  - id: JuniorDevAgent
+    description: Handles routine coding tasks (e.g., implement simple functions) with low compute budget.
+    seniority: junior
+    modelTier: basic  # e.g., Claude Haiku for cost-efficiency
+    capabilities:
+      - codeGeneration
+      - tddImplementation
+      - gitCommit  # Via MCP to source control
+    interactions:
+      - with: SeniorDevAgent
+        how: escalateComplexTasks  # Protocol: Send task ID and context via shared MCP channel
+      - with: PMAgent
+        how: receiveStories  # Pull Gherkin scenarios via RAG from organizational artifacts
+    constraints:
+      - tokenBudget: 2000
+      - noWriteAccessToCoreOntology  # Read-only via RAG
+    evolutionNotes: Could extend to OWL class with BFO 'process' for dynamic inheritance.
+
+  - id: SeniorDevAgent
+    description: Tackles complex defects/core code, reviews juniors' work.
+    seniority: senior
+    modelTier: advanced  # e.g., Claude Opus
+    capabilities:
+      - codeReview
+      - securityAudit
+      - bddValidation
+    interactions:
+      - with: JuniorDevAgent
+        how: provideFeedback  # MCP: Comment on PRs or direct messages
+      - with: OptimizationAgent
+        how: reportMetrics  # Send defect rates via accounting MCP
+    constraints:
+      - tokenBudget: 10000
+      - partialWriteAccess  # Can propose ontology updates (e.g., add new patterns)
+    evolutionNotes: Integrate DCAT for cataloging code artifacts; evolve to RDF for inference on code smells.
+
+  - id: PMAgent
+    description: Envisions user stories, gathers feedback (e.g., from Reddit), formats in Gherkin.
+    seniority: mid
+    modelTier: mid
+    capabilities:
+      - storyGeneration
+      - feedbackScraping  # Via web tools or MCP to external APIs
+      - investCompliance  # Ensure stories follow INVEST principles
+    interactions:
+      - with: DevAgents  # Collective for all dev roles
+        how: pushStories  # MCP: Update Jira-like artifacts
+      - with: HumanCEO
+        how: escalatePriorities  # If value unclear, query human
+    constraints:
+      - focusOnValue: true  # Enforce user value over tech tasks
+    evolutionNotes: Link to business domain ontology; could use RDF for querying user feedback relations.
+
+  # Add more roles as needed, e.g., OptimizationAgent, COOAgent
+
+hierarchies:
+  - chain: [JuniorDevAgent, SeniorDevAgent, LeadBootstrapAgent]
+    description: Escalation for dev tasks—junior to senior to bootstrap if unresolved.
+  - chain: [PMAgent, COOAgent, HumanCEO]
+    description: Product decisions escalate to oversight roles.
+
+processes:
+  - id: PairProgramming
+    description: Two dev agents collaborate on a task.
+    steps:
+      - agent1: JuniorDevAgent  # Writes initial code
+      - agent2: SeniorDevAgent  # Reviews and iterates
+      - output: Commit to source control via MCP
+    evolutionNotes: Evolve to BDD scenarios in Gherkin; integrate PROV for provenance tracking.
+
+integrations:
+  - type: mcp
+    examples:
+      - jira: {apiUrl: "https://your-jira.com", auth: oauth}
+      - git: {repo: "fleet-repo", auth: token}
+    description: For evolving artifacts (stories, code).
+  - type: rag
+    examples:
+      - vectorDb: qdrant  # For ontology queries
+    description: For read-only knowledge pulls.
+  - evolutionNotes: Add AWS actuators (e.g., Lambda invokes) via MCP servers.
+
+extensions:
+  - format: rdf/owl  # Placeholder for migration
+    uri: "http://example.com/fleet-ontology.owl"
+    description: Future semantic layer using BFO for foundational classes and DCAT for data catalogs.
+  - custom: []  # Agents can append new extensions here via MCP
+
+humanIntervention:
+  thresholds:
+    - confidenceBelow: 0.7  # Escalate to human
+    - costOverrun: 5000 tokens
+  contact: {method: email, to: ceo@example.com}

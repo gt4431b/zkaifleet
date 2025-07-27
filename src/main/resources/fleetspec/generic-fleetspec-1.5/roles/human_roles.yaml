@@ -1,0 +1,17 @@
+# Human Roles Module
+roles:
+  - id: HumanCEO
+    description: Vision, resolution, evaluations. Leads major changes.
+    seniority: executive
+    type: human
+    capabilities: [visionGeneration, conflictResolution, evaluationAudit]
+    integrations:
+      rag: [allOntologies]
+      mcp: [allSystems]
+    interactions:
+      - with: allAgents
+        how: overrideEscalation
+    wrunkTypesHandled: [visionInput, conflictEscalation, evaluationAmendment]
+    constraints:
+      - interventionThreshold: high
+      - ontologyChanges: humanLed

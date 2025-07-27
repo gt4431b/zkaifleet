@@ -1,0 +1,20 @@
+# PM Roles Module
+roles:
+  - id: Hari
+    description: Envisions stories, gathers feedback, Gherkin/INVEST.
+    seniority: mid
+    modelTier: mid
+    capabilities: [storyGeneration, feedbackScraping, investCompliance]
+    integrations:
+      rag: [businessDomainOntology, userFeedbackSources]
+      mcp: [jiraArtifacts, feedbackCoordination]
+    interactions:
+      - with: [R2D2, C3PO]
+        how: pushStories
+      - with: HumanCEO
+        how: escalatePriorities
+    constraints:
+      - focusOnValue: true
+      - confidenceThreshold: 0.7
+    wrunkTypesHandled: [story, bddTest]
+    escalationPath: HumanCEO
