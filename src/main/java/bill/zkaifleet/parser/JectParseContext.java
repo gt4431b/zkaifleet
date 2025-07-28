@@ -3,8 +3,11 @@ package bill.zkaifleet.parser ;
 import java.lang.reflect.InvocationTargetException ;
 import java.util.ArrayList ;
 import java.util.HashMap ;
+import java.util.IdentityHashMap ;
+import java.util.LinkedList ;
 import java.util.List ;
 import java.util.Map ;
+import java.util.Queue ;
 import java.util.Stack ;
 
 import bill.zkaifleet.model.BasePredicate ;
@@ -19,7 +22,8 @@ import lombok.Data ;
 @Data
 public class JectParseContext {
 
-	private final Map <String, Placeholder <Ject>> identityMap = new HashMap <> ( ) ;
+	private final Map <String, Placeholder <Ject>> placeholders = new HashMap <> ( ) ;
+	private final Map <String, Ject> identityMap = new HashMap <> ( ) ;
 	private Stack <LocalParseContext> contextStack = new Stack <> ( ) ;
 	private Map <String, ParserRegistry> ontologyCatalog = new HashMap <> ( ) ;
 	private Visitor visitor = new Visitor ( ) ;
@@ -89,6 +93,9 @@ public class JectParseContext {
 				if ( raw != null ) {
 					currentJect.addScalar ( BasePredicate.literal, raw ) ;
 				}
+			}
+			if ( currentJect.getId ( ) != null ) {
+				identityMap.put ( currentJect.getId ( ), currentJect ) ;
 			}
 		} catch ( InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e ) {
 			throw new RuntimeException ( "Error while building Jects: " + e.getMessage ( ), e ) ;
@@ -169,16 +176,104 @@ public class JectParseContext {
 	}
 
 	public Placeholder <Ject> getOrCreatePlaceholder ( String id, String typeName, String ontology ) {
-		return identityMap.computeIfAbsent ( id, k -> new Placeholder <> ( id, typeName, ontology ) ) ;
+		return placeholders.computeIfAbsent ( id, k -> new Placeholder <> ( id, typeName, ontology ) ) ;
 	}
 
 	public void resolveAll ( ) {
-		// Third pass logic: Iterate and swap placeholders
-		
+		for ( Map.Entry <String, Placeholder <Ject>> entry : placeholders.entrySet ( ) ) {
+			String id = entry.getKey ( ) ;
+			Placeholder <Ject> placeholder = entry.getValue ( ) ;
+			Ject ject = identityMap.get ( id ) ;
+			placeholder.resolve ( ject ) ; // Resolve the placeholder with the Ject from identityMap
+		}
+		Queue <Ject> queue = new LinkedList <> ( ) ;
+		Map <Ject, String> visited = new IdentityHashMap <> ( ) ; // Track visited Jects to avoid cycles
+		queue.add ( ontology ) ; // Start with the root ontology
+		while ( ! queue.isEmpty ( ) ) {
+			Ject current = queue.poll ( ) ;
+			if ( visited.containsKey ( current ) ) {
+				continue ; // Skip already visited Ject to avoid cycles
+			} else {
+				visited.put ( current, "X" ) ; // Mark current Ject as visited
+			}
+			resolveRelations ( current ) ; // Resolve relations for the current Ject
+			for ( List <Ject> subjects : current.getSubjects ( ).values ( ) ) {
+				queue.addAll ( subjects ); // Add all subjects to the queue for further processing
+			}
+		}
+	}
+
+	// Update in bill.zkaifleet.parser.OntologyParser (in resolveRelations, handle literal conversion in lists)
+	public void resolveRelations ( Ject ject ) {
+	    // Traverse and replace placeholders in subjects
+	    for (Map.Entry<Predicate, List<Ject>> entry : ject.getSubjects ( ).entrySet()) {
+			boolean literals = false ;
+			boolean placeHolders = false ;
+	        List<Object> resolvedList = new ArrayList<>(); // Use Object to hold Jects or scalars
+	        for (Ject item : entry.getValue()) {
+	            Object resolvedItem = item.resolveLiterals(); // Convert if literal
+	            if (resolvedItem instanceof Placeholder) {
+		        	placeHolders = true ;
+	                Placeholder<?> placeholder = (Placeholder<?>) resolvedItem;
+	                if (placeholder.getResolved() != null) {
+	                    resolvedList.add(placeholder.getResolved().resolveLiterals());
+	                } else {
+	                    throw new IllegalStateException("Unresolved placeholder in relation: " + placeholder.getId());
+	                }
+	            } else if ( ! ( resolvedItem instanceof Ject ) ) {
+	                // If resolvedItem is not a Ject, treat it as a literal scalar
+	                // This is where we handle literals in the relation
+	            	literals = true ;
+	                resolvedList.add(resolvedItem);
+	            }
+	        }
+
+	        if ( placeHolders && literals ) {
+	        	throw new IllegalStateException("Cannot mix Jects and literals in the same relation: " + entry.getKey().name());
+	        } else if ( placeHolders ) {
+	        	List<Ject> resolvedJects = (List<Ject>) resolvedList.stream().filter(Ject.class::isInstance).map ( j -> ( Ject ) j ).toList ( ) ;
+	        	entry.setValue(resolvedJects ) ; // For now, filter scalars if not Ject; evolve as needed
+	        	for ( Ject jectItem : resolvedJects ) {
+	        		jectItem.addIsObjectOf ( entry.getKey ( ), ject ) ; // Add back the relation to the original Ject
+	        	}
+	        } else if ( literals ) {
+	        	ject.setScalars ( entry.getKey ( ), resolvedList ) ; // If all scalars, add as scalar
+	        	ject.removeTypedSubjects ( entry.getKey ( ) ) ; // Remove the relation if only scalars
+	        }
+	    }
+
+	    // Similarly for isObjectOf
+	    for (Map.Entry<Predicate, List<Ject>> entry : ject.getIsObjectOf ( ).entrySet()) {
+			boolean literals = false ;
+			boolean jects = false ;
+	        List<Object> resolvedList = new ArrayList<>();
+	        for (Ject item : entry.getValue()) {
+	            Object resolvedItem = item.resolveLiterals();
+	            if (resolvedItem instanceof Placeholder) {
+	            	jects = true ;
+	                Placeholder<?> placeholder = (Placeholder<?>) resolvedItem;
+	                if (placeholder.getResolved() != null) {
+	                    resolvedList.add(placeholder.getResolved().resolveLiterals());
+	                } else {
+	                    throw new IllegalStateException("Unresolved placeholder in isObjectOf: " + placeholder.getId());
+	                }
+	            } else if ( ! ( resolvedItem instanceof Ject ) ) {
+	            	literals = true ;
+	                resolvedList.add(resolvedItem);
+	            }
+	        }
+	        if ( jects && literals ) {
+	        	throw new IllegalStateException("Cannot mix Jects and literals in the same isObjectOf relation: " + entry.getKey().name());
+	        } else if ( jects ) {
+	        	entry.setValue((List<Ject>) resolvedList.stream().filter(Ject.class::isInstance).map ( j -> ( Ject ) j ).toList ( ) ) ;
+	        } else if ( literals ) {
+	        	ject.setScalars ( entry.getKey ( ), resolvedList ) ; // If all scalars, add as scalar
+	        }
+	    }
 	}
 
 	public boolean hasSeen ( String id ) {
-		return identityMap.containsKey ( id ) ;
+		return placeholders.containsKey ( id ) ;
 	}
 
 	private record LocalParseContext ( Ject current, String ontologyName, Object raw ) { ; }

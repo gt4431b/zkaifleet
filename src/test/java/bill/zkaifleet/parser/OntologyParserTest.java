@@ -17,7 +17,6 @@ import java.util.List ;
 @QuarkusTest
 public class OntologyParserTest {
 
-	@SuppressWarnings ( "unchecked" )
 	@Test
 	public void testParseSimpleYamlToJectTree() {
 	    OntologyParser parser = new OntologyParser();
@@ -38,8 +37,8 @@ public class OntologyParserTest {
 	    assertEquals("jects", j1.getTypeName());
 	    assertEquals("value123", j1.getScalar(createPred("scalarProp"), Object.class));
 	    assertEquals("unknown", j1.getScalar(createPred("type"), Object.class));
-	    List<Object> listProp = (List<Object>) j1.getScalar(createPred("listProp"), List.class);
-	    assertEquals(Arrays.asList("itemA", "itemB"), listProp);
+	    List<String> listProp = j1.getScalars(createPred("listProp"), String.class);
+	    assertEquals(Arrays.asList("itemA", "itemB"), listProp)	;
 
 	    // Ref to j2 as relation
 	    List<Ject> refProp = j1.getTypedSubjects(createPred("refProp"), Ject.class);

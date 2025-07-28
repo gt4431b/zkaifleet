@@ -23,7 +23,7 @@ public abstract class Ject {
 	private String description ;
 	private String evolutionNotes ;
 	protected final String typeName ;
-	protected final String ontology ;
+	protected String ontology ;
 	protected final Map <Predicate, List <Ject>> subjects = new HashMap <> ( ) ;
 	protected final Map <Predicate, List <Ject>> isObjectOf = new HashMap <> ( ) ;
 	protected final Map <Predicate, List <Object>> scalars = new HashMap <> ( ) ;
@@ -68,7 +68,7 @@ public abstract class Ject {
 		}
 	}
 
-	protected void removeTypedSubjects ( Predicate p ) {
+	public void removeTypedSubjects ( Predicate p ) {
 		List <Ject> items = subjects.get ( p ) ;
 		if ( items != null ) {
 			for ( Ject item : items ) {
@@ -88,7 +88,7 @@ public abstract class Ject {
 		}
 	}
 
-	protected void addIsObjectOf ( Predicate pred, Ject subj ) {
+	public void addIsObjectOf ( Predicate pred, Ject subj ) {
 		isObjectOf.computeIfAbsent ( pred, k -> new ArrayList <> ( ) ).add ( subj ) ;
 	}
 
@@ -128,6 +128,15 @@ public abstract class Ject {
 		}
 		return typed ;
 	}
+
+	public void setScalars ( Predicate pred, List <Object> values ) {
+		if ( values == null || values.isEmpty ( ) ) {
+			scalars.remove ( pred ) ; // Clear if empty
+		} else {
+			scalars.put ( pred, new ArrayList <> ( values ) ) ;
+		}
+	}
+
 	public void addScalar ( Predicate pred, Object scalar ) {
 		scalars.computeIfAbsent ( pred, k -> new ArrayList <> ( ) ).add ( scalar ) ;
 		// If the predicate has a qualifier, we could also handle it here
@@ -137,8 +146,8 @@ public abstract class Ject {
 			// If the predicate has a setter, we can use it to set the scalar value
 			pred.qualifier ( ).setter ( ).accept ( scalar, this ) ;
 		} else {
-			if ( ! attemptSet ( pred, scalar, "set" ) ) {
-				attemptSet ( pred, scalar, "add" ) ;
+			if ( ! attemptSet ( pred, scalar, "add" ) ) {
+				attemptSet ( pred, scalar, "set" ) ;
 			}
 		}
 	}
@@ -151,5 +160,19 @@ public abstract class Ject {
 		} catch ( NoSuchMethodException | SecurityException | IllegalAccessException | InvocationTargetException e ) {
 			return false ; // Method not found or invocation failed
 		}
+	}
+
+	public Object resolveLiterals() {
+	    if (this instanceof RuntimeJect runtime && isLiteral(runtime)) {
+	        // Return the literal value directly (no ScalarJect)
+	        return runtime.getScalar(BasePredicate.literal, Object.class);
+	    }
+	    return this; // Not a literal, return self
+	}
+
+	private boolean isLiteral(RuntimeJect ject) {
+	    // Check if only one scalar "literal" and no subjects/isObjectOf
+	    return ject.getScalars().size() == 1 && ject.getScalars().containsKey(BasePredicate.literal) 
+	           && ject.getSubjects().isEmpty() ;
 	}
 }

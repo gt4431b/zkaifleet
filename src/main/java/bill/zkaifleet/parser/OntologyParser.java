@@ -9,6 +9,7 @@ import java.util.Set ;
 import java.util.UUID ;
 
 import bill.zkaifleet.model.BaseParserRegistry ;
+import bill.zkaifleet.model.BasePredicate ;
 import bill.zkaifleet.model.Ject ;
 import bill.zkaifleet.model.Ontology ;
 import bill.zkaifleet.model.ParserRegistry ;
@@ -37,7 +38,8 @@ public class OntologyParser {
 		String id = ( String ) raw.get ( "id" ) ;
 		id = id == null ? UUID.randomUUID ( ).toString ( ) : id ;
 		Ontology retVal = new Ontology ( ontologyName ) ;
-		retVal.setId ( id ) ;
+		retVal.addScalar ( BasePredicate.id, id );
+		retVal.addScalar ( BasePredicate.ontologyName, ontologyName ) ;
 		Map <String, Object> rawRemnants = new LinkedHashMap <> ( raw ) ;
 		rawRemnants.remove ( "ontology" ) ;
 		rawRemnants.remove ( "id" ) ;
@@ -100,77 +102,7 @@ public class OntologyParser {
 		}
 		return count ;
 	}
-/*
-	private Ject buildJects ( Map <String, Object> raw, JectParseContext context ) {
-		String id = ( String ) raw.get ( "id" ) ;
-		String typeName = ( String ) raw.getOrDefault ( "type", "Runtime" ) ;
-		String ontologyName = ( String ) raw.getOrDefault ( "ontology", "fleet" ) ;
 
-		if ( id != null && context.hasSeen ( id ) ) {
-			throw new CycleDetectedException ( "Cycle detected at ID: " + id ) ;
-		}
-
-		Ject ject ;
-		if ( raw.containsKey ( "ontology" ) && ! raw.containsKey ( "id" ) && ! raw.containsKey ( "type" ) ) {
-			// Top-level root: Create Ontology
-			ject = new Ontology ( UUID.randomUUID ( ).toString ( ) ) ;
-			( ( Ontology ) ject ).setOntologyName ( ontologyName ) ;
-		} else {
-			ject = new RuntimeJect ( id != null ? id : UUID.randomUUID ( ).toString ( ), typeName, ontologyName ) ;
-		}
-		if ( id != null ) {
-			context.getOrCreatePlaceholder ( id, typeName, ontologyName ).resolve ( ject ) ;
-		}
-
-		// Scalars and relations
-		for ( Map.Entry <String, Object> entry : raw.entrySet ( ) ) {
-			String key = entry.getKey ( ) ;
-			Object value = entry.getValue ( ) ;
-			if ( ! "id".equals ( key ) && ! "type".equals ( key ) && ! "ontology".equals ( key ) ) {
-				if ( value instanceof Map ) {
-					Map <String, Object> mapValue = ( Map <String, Object> ) value ;
-					if ( mapValue.containsKey ( "ref" ) ) {
-						// Reference: {ref: id}
-						String refId = ( String ) mapValue.get ( "ref" ) ;
-						if ( refId != null ) {
-							Placeholder <Ject> ref = context.getOrCreatePlaceholder ( refId, "Runtime", ontologyName ) ;
-							( ( RuntimeJect ) ject ).addRuntimeSubject ( key, ref ) ;
-						} else {
-							log.warn ( "Invalid ref format for key: {}", key ) ;
-						}
-					} else {
-						// Nested Ject
-						Ject nested = buildJects ( mapValue, context ) ;
-						( ( RuntimeJect ) ject ).addRuntimeSubject ( key, nested ) ;
-					}
-				} else if ( value instanceof List ) {
-					// List: If items are maps, recurse as Jects
-					List <?> list = ( List <?> ) value ;
-					if ( ! list.isEmpty ( ) && list.get ( 0 ) instanceof Map ) {
-						for ( Object item : list ) {
-							if ( item instanceof Map ) {
-								Ject listItem = buildJects ( ( Map <String, Object> ) item, context ) ;
-								if ( ject instanceof Ontology && "jects".equals ( key ) ) {
-									( ( Ontology ) ject ).addRoot ( listItem ) ;
-								} else {
-									( ( RuntimeJect ) ject ).addRuntimeSubject ( key, listItem ) ;
-								}
-							}
-						}
-					} else {
-						// Simple list scalar
-						( ( RuntimeJect ) ject ).addScalar ( key, value ) ;
-					}
-				} else {
-					// Simple scalar
-					( ( RuntimeJect ) ject ).addScalar ( key, value ) ;
-				}
-			}
-		}
-
-		return ject ;
-	}
-*/
 	public void validateAnomalies ( Ject root ) {
 		if ( ! ( root instanceof Ontology ) && root.getId ( ) == null ) {
 			throw new IllegalStateException ( "Non-root Ject missing id" ) ;
