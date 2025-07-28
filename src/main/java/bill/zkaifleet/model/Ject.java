@@ -90,7 +90,7 @@ public abstract class Ject {
 		isObjectOf.computeIfAbsent ( pred, k -> new ArrayList <> ( ) ).add ( subj ) ;
 	}
 
-	protected <T extends Ject> List <T> getTypedIsObjectOf ( Predicate pred, Class <T> type ) {
+	public <T extends Ject> List <T> getTypedIsObjectOf ( Predicate pred, Class <T> type ) {
 		List <Ject> raw = isObjectOf.getOrDefault ( pred, Collections.emptyList ( ) ) ;
 		List <T> typed = new ArrayList <> ( ) ;
 		for ( Ject item : raw ) {

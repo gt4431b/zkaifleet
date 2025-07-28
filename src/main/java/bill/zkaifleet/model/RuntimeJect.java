@@ -36,4 +36,10 @@ public class RuntimeJect extends Ject {
 		}
 		throw new IllegalStateException ( "Invalid type for scalar: " + key ) ;
 	}
+
+	public RuntimeJect addRuntimeSubject(String predKey, Ject obj) {
+	    Predicate pred = new RuntimePredicate(predKey, "runtime", ontology);
+	    addTypedSubject(pred, obj);
+	    return this;
+	}
 }

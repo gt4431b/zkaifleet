@@ -3,6 +3,7 @@
 # Description: Central spec with references to sub-files. Supports flexible URIs (classpath://, file:///, relative, etc.). Evolves from v1.4 by modularizing for bite-sized management.
 # Evolution Notes: Add proprietary protocols (e.g., fleet-catalog://) for scaled registries. Human approval for major changes.
 
+ontology: fleet
 fleet:
   name: AIFleetPrototype
   version: 1.5
