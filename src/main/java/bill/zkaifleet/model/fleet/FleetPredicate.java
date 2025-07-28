@@ -3,12 +3,14 @@ package bill.zkaifleet.model.fleet;
 import java.util.List ;
 
 import bill.zkaifleet.model.Ject ;
+import bill.zkaifleet.model.Ontology ;
 import bill.zkaifleet.model.Predicate ;
 import bill.zkaifleet.model.PredicateQualifier ;
 
 //Enum for first-class Predicates (expanded for ontology elements)
 public enum FleetPredicate implements Predicate {
 	// singleton, required, // pluralName, objectTypes, subjectTypes, scalarType
+	fleet ( new PredicateQualifier ( false, true, null, List.of ( Ontology.class ), FleetJect.class, null, null ) ),
 	id ( new PredicateQualifier ( true, true, null, null, null, String.class, ( Object s, Ject j ) -> j.setId ( ( String ) s ) ) ),
 	role ( new PredicateQualifier ( false, true, "roles", List.of ( FleetJect.class ), RoleJect.class, null, null ) ),
 	process ( new PredicateQualifier ( false, true, "processes", List.of ( FleetJect.class ), ProcessJect.class, null, null ) ),

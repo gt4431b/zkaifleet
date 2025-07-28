@@ -18,6 +18,12 @@ public class ParserRegistry {
 		this.ontologyName = ontologyName ;
 	}
 
+	public void addRootSubject ( String predicateName, Class <? extends Ject> rootSubjectType ) {
+		if ( predicateName != null && !predicateName.isEmpty ( ) && rootSubjectType != null ) {
+			rootSubjects.put ( predicateName, rootSubjectType ) ;
+		}
+	}
+
 	public void addPredicate ( Predicate p ) {
 		if ( p != null && !predicates.containsKey(p.toString()) ) {
 			predicates.put ( p.name ( ), p);
@@ -38,10 +44,12 @@ public class ParserRegistry {
 		}
 	}
 
-	public void addPredicates ( Class <Enum <? extends Predicate>> predicatesEnum ) {
+	public void addPredicatesEnums ( Class <Enum <?>> predicatesEnum ) {
 		if ( predicatesEnum != null ) {
-			for ( Enum <? extends Predicate> predicate : predicatesEnum.getEnumConstants ( ) ) {
-				addPredicate ( ( Predicate ) predicate ) ;
+			for ( Enum <?> predicate : predicatesEnum.getEnumConstants ( ) ) {
+				if ( predicate instanceof Predicate ) {
+					addPredicate ( ( Predicate ) predicate ) ;
+				}
 			}
 		}
 	}
