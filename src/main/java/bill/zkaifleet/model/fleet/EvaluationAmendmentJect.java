@@ -4,7 +4,7 @@ import bill.zkaifleet.model.Ject ;
 
 public class EvaluationAmendmentJect extends Ject {
 
-	public EvaluationAmendmentJect(String id) {
-		super(id, "evaluationAmendment", "fleet");
+	public EvaluationAmendmentJect ( ) {
+		super( "evaluationAmendment", "fleet");
 	}
 }

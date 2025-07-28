@@ -15,12 +15,12 @@ import java.util.Map ;
 @JsonInclude ( JsonInclude.Include.NON_NULL )
 public class RuntimeJect extends Ject {
 
-	private final Map <String, Object> scalarProperties = new HashMap <> ( ) ;
+//	private final Map <String, Object> scalarProperties = new HashMap <> ( ) ;
 
-	public RuntimeJect ( String id, String typeName, String ontology ) {
-		super ( id, typeName, ontology ) ;
+	public RuntimeJect ( String typeName, String ontology ) {
+		super ( typeName, ontology ) ;
 	}
-
+/*
 	public void addScalar ( String key, Object value ) {
 		scalarProperties.put ( key, value ) ;
 	}
@@ -36,7 +36,7 @@ public class RuntimeJect extends Ject {
 		}
 		throw new IllegalStateException ( "Invalid type for scalar: " + key ) ;
 	}
-
+*/
 	public RuntimeJect addRuntimeSubject(String predKey, Ject obj) {
 	    Predicate pred = new RuntimePredicate(predKey, "runtime", ontology);
 	    addTypedSubject(pred, obj);

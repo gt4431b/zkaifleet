@@ -14,7 +14,7 @@ public class ConstraintsJect extends Ject {
 	private String focus ;
 	private Double confidenceThreshold ;
 
-	public ConstraintsJect ( String id ) {
-		super ( id, "constraints", "fleet" ) ;
+	public ConstraintsJect ( ) {
+		super ( "constraints", "fleet" ) ;
 	}
 }

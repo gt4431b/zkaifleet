@@ -4,7 +4,7 @@ import bill.zkaifleet.model.Ject ;
 
 public class TaskJect extends Ject {
 
-	public TaskJect ( String id ) {
-		super ( id, "task", "fleet" ) ;
+	public TaskJect ( ) {
+		super ( "task", "fleet" ) ;
 	}
 }

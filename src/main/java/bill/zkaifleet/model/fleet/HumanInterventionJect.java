@@ -15,8 +15,8 @@ import lombok.EqualsAndHashCode ;
 public class HumanInterventionJect extends Ject {
     private List<String> thresholds = new ArrayList<>(); // e.g., confidenceBelow: 0.7
 
-    public HumanInterventionJect(String id) {
-        super(id, "humanIntervention", "fleet");
+    public HumanInterventionJect ( ) {
+        super ( "humanIntervention", "fleet");
     }
 
     // Typed relation (e.g., to contacts)

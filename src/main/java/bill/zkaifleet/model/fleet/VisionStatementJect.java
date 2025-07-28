@@ -1,7 +1,5 @@
 package bill.zkaifleet.model.fleet;
 
-import java.util.List ;
-
 import com.fasterxml.jackson.annotation.JsonInclude ;
 
 import bill.zkaifleet.model.Ject ;
@@ -15,10 +13,10 @@ public class VisionStatementJect extends Ject {
     private String inputMethod;
     private String distribution;
 
-    public VisionStatementJect(String id) {
-        super(id, "visionStatement", "fleet");
+    public VisionStatementJect ( ) {
+        super ( "visionStatement", "fleet");
     }
-
+/*  I'm not sure what these are, they are not in the original aifleet spec.
     // Typed relation (e.g., to breakdowns/tasks)
     public List<TaskJect> getBreakdowns() {
         return getTypedSubjects(FleetPredicate.breakdown, TaskJect.class);
@@ -28,4 +26,5 @@ public class VisionStatementJect extends Ject {
         addTypedSubject(FleetPredicate.breakdown, task);
         return this;
     }
+*/
 }

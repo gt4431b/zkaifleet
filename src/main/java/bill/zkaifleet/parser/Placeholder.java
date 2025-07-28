@@ -18,7 +18,8 @@ public class Placeholder<T extends Ject> extends Ject {
     private T resolved = null;
 
     public Placeholder(String id, String typeName, String ontology) {
-        super(id, typeName, ontology);
+        super(typeName, ontology);
+        setId ( id ) ;
     }
 
     public void resolve(T actual) {

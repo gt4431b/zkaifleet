@@ -12,10 +12,12 @@ import lombok.EqualsAndHashCode ;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Ontology extends Ject {
 
-	private String ontologyName ;
+	public Ontology() {
+		this ( "base" ) ;
+	}
 
-	public Ontology(String id) {
-		super(id, "ontology", "base");
+	public Ontology ( String ontologyName ) {
+		super ( "ontology", ontologyName ) ;
 	}
 
 	public List<Ject> getRoots() {

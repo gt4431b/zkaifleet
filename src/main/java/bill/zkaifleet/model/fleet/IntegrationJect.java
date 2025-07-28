@@ -17,8 +17,8 @@ public class IntegrationJect extends Ject {
  private String type; // e.g., mcp, rag
  private String repo; // For git, etc.
 
- public IntegrationJect(String id) {
-     super(id, "integration", "fleet");
+ public IntegrationJect ( ) {
+     super ( "integration", "fleet");
  }
 
  // Typed relation (e.g., to roles using it)

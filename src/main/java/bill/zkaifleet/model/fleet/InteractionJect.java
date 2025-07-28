@@ -15,8 +15,8 @@ public class InteractionJect extends Ject {
     private String with; // e.g., other agent ID
     private String how; // e.g., notifyReview
 
-    public InteractionJect(String id) {
-        super(id, "InteractionJect", "fleet");
+    public InteractionJect ( ) {
+        super ( "interaction", "fleet");
     }
 
     // Typed relation (e.g., to roles involved)

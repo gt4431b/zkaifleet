@@ -18,8 +18,8 @@ public class BootstrapAgentJect extends Ject {
     private List <String> capabilities = new ArrayList <> ( ) ; // Example list of capabilities
     private List <String> escalationPath = new ArrayList <> ( ) ;
 
-    public BootstrapAgentJect(String id) {
-        super(id, "bootstrapAgent", "fleet");
+    public BootstrapAgentJect ( ) {
+        super ( "bootstrapAgent", "fleet" ) ;
     }
 
     // Typed relation example (e.g., to processes it handles)

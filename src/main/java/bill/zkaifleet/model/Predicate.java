@@ -9,6 +9,8 @@ import com.fasterxml.jackson.annotation.JsonInclude ;
 @JsonInclude ( JsonInclude.Include.NON_NULL )
 public interface Predicate {
 
+	public PredicateQualifier qualifier ( ) ;
+
 	public String name ( ) ;
 
 	public default String space ( ) {

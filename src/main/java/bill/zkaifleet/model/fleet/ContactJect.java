@@ -14,7 +14,7 @@ public class ContactJect extends Ject {
 	private String method ;
 	private String to ;
 
-	public ContactJect ( String id ) {
-		super ( id, "contact", "fleet" ) ;
+	public ContactJect ( ) {
+		super ( "contact", "fleet" ) ;
 	}
 }

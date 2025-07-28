@@ -25,7 +25,7 @@ public class OntologyParserTest {
 
         assertInstanceOf(Ontology.class, root);
         Ontology ontology = (Ontology) root;
-        assertEquals("test", ontology.getOntologyName());
+        assertEquals("test", ontology.getOntology());
 
         List<Ject> roots = ontology.getRoots();
         assertEquals(2, roots.size());
@@ -34,8 +34,8 @@ public class OntologyParserTest {
         RuntimeJect j1 = (RuntimeJect) roots.get(0);
         assertEquals("j1", j1.getId());
         assertEquals("unknown", j1.getTypeName());
-        assertEquals("value123", j1.getScalar("scalarProp"));
-        List<Object> listProp = (List<Object>) j1.getScalarAs("listProp", List.class);
+        assertEquals("value123", j1.getScalar(createPred("scalarProp"), Object.class));
+        List<Object> listProp = (List<Object>) j1.getScalar(createPred("listProp"), List.class);
         assertEquals(Arrays.asList("itemA", "itemB"), listProp);
 
         // Ref to j2
@@ -50,7 +50,7 @@ public class OntologyParserTest {
         assertEquals(1, nested.size());
         RuntimeJect j3 = (RuntimeJect) nested.get(0);
         assertEquals("j3", j3.getId());
-        assertEquals("nestedValue", j3.getScalar("scalar"));
+        assertEquals("nestedValue", j3.getScalar(createPred("scalar"), Object.class));
 
         // Bidirectional check
         List<Ject> j2Refs = refProp.get(0).getTypedIsObjectOf(createPred("refProp"), Ject.class);

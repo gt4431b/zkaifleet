@@ -17,16 +17,16 @@ import java.util.* ;
 @JsonInclude ( JsonInclude.Include.NON_NULL )
 public abstract class Ject {
 
-	private final String id ;
+	private String id ;
 	private String description ;
 	private String evolutionNotes ;
 	protected final String typeName ;
 	protected final String ontology ;
 	protected final Map <Predicate, List <Ject>> subjects = new HashMap <> ( ) ;
 	protected final Map <Predicate, List <Ject>> isObjectOf = new HashMap <> ( ) ;
+	protected final Map <Predicate, List <Object>> scalars = new HashMap <> ( ) ;
 
-	public Ject ( String id, String typeName, String ontology ) {
-		this.id = id ;
+	public Ject ( String typeName, String ontology ) {
 		this.typeName = typeName ;
 		this.ontology = ontology ;
 	}
@@ -53,12 +53,12 @@ public abstract class Ject {
 		return this ; // Fluent
 	}
 
-	protected <C extends Ject> C getSingleTypedSubject ( Predicate p, Class <C> czz ) {
+	public <C extends Ject> C getSingleTypedSubject ( Predicate p, Class <C> czz ) {
 		List <C> cand = getTypedSubjects ( p, czz ) ;
 		return cand.isEmpty ( ) ? null : cand.get ( 0 ) ;
 	}
 
-	protected void setSingleTypedSubject ( Predicate p, Ject j ) {
+	public void setSingleTypedSubject ( Predicate p, Ject j ) {
 		if ( j != null ) {
 			addTypedSubject ( p, j ) ;
 		} else {
@@ -101,5 +101,37 @@ public abstract class Ject {
 			}
 		}
 		return typed ;
+	}
+
+	public <T> T getScalar ( Predicate pred, Class <T> type ) {
+		List <T> scalarsList = getScalars ( pred, type ) ;
+		if ( scalarsList.isEmpty ( ) ) {
+			return null ; // or throw an exception if preferred
+		}
+		if ( scalarsList.size ( ) > 1 ) {
+			throw new IllegalStateException ( "Multiple scalars found for predicate: " + pred.name ( ) ) ;
+		}
+		return scalarsList.get ( 0 ) ;
+	}
+
+	public <T> List <T> getScalars ( Predicate pred, Class <T> type ) {
+		List <Object> raw = scalars.getOrDefault ( pred, Collections.emptyList ( ) ) ;
+		List <T> typed = new ArrayList <> ( ) ;
+		for ( Object item : raw ) {
+			if ( type.isInstance ( item ) ) {
+				typed.add ( type.cast ( item ) ) ;
+			} else {
+				throw new IllegalStateException ( "Type mismatch for scalar: " + pred.name ( ) ) ;
+			}
+		}
+		return typed ;
+	}
+	public void addScalar ( Predicate pred, Object scalar ) {
+		scalars.computeIfAbsent ( pred, k -> new ArrayList <> ( ) ).add ( scalar ) ;
+		// If the predicate has a qualifier, we could also handle it here
+		// For example, if pred.qualifier() is not null, we might want to do something specific
+		// This is commented out as it depends on the specific use case
+		// if ( pred.qualifier ( ) != null ) {
+//		pred.qualifier ( ).setter ( ).accept ( scalar, this ) ;
 	}
 }

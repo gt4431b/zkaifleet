@@ -7,8 +7,8 @@ public class ProcessJect extends Ject {
 	private String name;
 	private String description;
 
-	public ProcessJect(String id) {
-		super(id, "ProcessJect", "fleet");
+	public ProcessJect ( ) {
+		super ( "process", "fleet");
 	}
 
 	public String getName() {

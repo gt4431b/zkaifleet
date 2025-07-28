@@ -18,8 +18,8 @@ public class RoleJect extends Ject {
 	private String modelTier ;
 	private List <String> capabilities = new ArrayList <> ( ) ;
 
-	public RoleJect ( String id ) {
-		super ( id, "role", "fleet" ) ;
+	public RoleJect ( ) {
+		super ( "role", "fleet" ) ;
 	}
 
 	public List <ProcessJect> getProcesses ( ) {
@@ -58,4 +58,16 @@ public class RoleJect extends Ject {
 	}
 
 	private List <String> escalationPath = new ArrayList <> ( ) ;
+
+	public void addCapability ( String c ) {
+		if ( !capabilities.contains ( c ) ) {
+			capabilities.add ( c ) ;
+		}
+	}
+
+	public void addEscalationPath ( String c ) {
+		if ( !escalationPath.contains ( c ) ) {
+			escalationPath.add ( c ) ;
+		}
+	}
 }

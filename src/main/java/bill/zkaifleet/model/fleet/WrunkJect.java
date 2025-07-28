@@ -17,7 +17,7 @@ public class WrunkJect extends Ject {
 	private List <String> fields = new ArrayList <> ( ) ;
 	private String storage ;
 
-	public WrunkJect ( String id ) {
-		super ( id, "wrunct", "fleet" ) ;
+	public WrunkJect ( ) {
+		super ( "wrunct", "fleet" ) ;
 	}
 }

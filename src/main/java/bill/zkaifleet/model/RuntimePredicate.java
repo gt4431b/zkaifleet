@@ -1,5 +1,7 @@
 package bill.zkaifleet.model ;
 
+import java.util.Collections ;
+
 //In bill.zkaifleet.model
 
 import com.fasterxml.jackson.annotation.JsonInclude ;
@@ -32,5 +34,10 @@ public class RuntimePredicate implements Predicate {
 	@Override
 	public String ontology ( ) {
 		return ontology ;
+	}
+
+	@Override
+	public PredicateQualifier qualifier ( ) {
+		return new PredicateQualifier ( false, false, null, Collections.emptyList ( ), RuntimeJect.class, null, null ) ;
 	}
 }

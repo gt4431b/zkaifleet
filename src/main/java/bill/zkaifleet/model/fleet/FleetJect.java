@@ -13,8 +13,8 @@ public class FleetJect extends Ject {
 	private String name ;
 	private String version ;
 
-	public FleetJect ( String id ) {
-		super ( id, "fleet", "fleet" ) ;
+	public FleetJect ( ) {
+		super ( "fleet", "fleet" ) ;
 	}
 
 	public BootstrapAgentJect getBootstrapAgent ( ) {
