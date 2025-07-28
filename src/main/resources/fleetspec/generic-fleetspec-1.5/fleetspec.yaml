@@ -21,7 +21,7 @@ fleet:
 
   wrunks:
     - classpath://wrunks/types.yaml
-    - ./wrunks/storage.yaml  # Split if needed
+##    - ./wrunks/storage.yaml  # Split if needed
 
   processes:
   - file:///processes/pair_programming.yaml

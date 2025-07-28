@@ -1,19 +1,25 @@
 # Wrunk Types Module
-description: Work units for tracking. Detect gridlock via patterns.
+#description: Work units for tracking. Detect gridlock via patterns.
+#evolutionNotes: RDF for noise/index calc; noise >0.6 restricts coders.
 types:
   - id: story
     fields: [id, description, valueStatement, acceptanceCriteria, timeSpent, tokenCost, confidenceScore, gridlockScore]
+    storage: mcpDatabase  # E.g., Postgres via MCP for amends; RAG for queries
   - id: codePoint
     fields: [gitCommitId, codeDiff, rationale, timeSpent, tokenCost, defectCount, confidenceScore, gridlockScore]
+    storage: mcpDatabase  # E.g., Postgres via MCP for amends; RAG for queries
   - id: tddTest
     fields: [testCode, results, passRate, timeSpent, tokenCost, confidenceScore, gridlockScore]
+    storage: mcpDatabase  # E.g., Postgres via MCP for amends; RAG for queries
   - id: bddTest
     fields: [gherkinScenario, executionResults, valueDelivery, timeSpent, tokenCost, confidenceScore, gridlockScore]
+    storage: mcpDatabase  # E.g., Postgres via MCP for amends; RAG for queries
   - id: conflictEscalation
     fields: [issueDescription, agentsInvolved, resolution, timeSpent, tokenCost, confidenceScore, gridlockScore]
+    storage: mcpDatabase  # E.g., Postgres via MCP for amends; RAG for queries
   - id: visionInput
     fields: [statement, breakdown, priority, timeSpent, tokenCost, confidenceScore, gridlockScore]
+    storage: mcpDatabase  # E.g., Postgres via MCP for amends; RAG for queries
   - id: evaluationAmendment
     fields: [originalWrunkId, amendments, evaluator, timeSpent, tokenCost, confidenceScore, gridlockScore]
-evolutionNotes: RDF for noise/index calc; noise >0.6 restricts coders.
-storage: mcpDatabase  # E.g., Postgres via MCP for amends; RAG for queries
+    storage: mcpDatabase  # E.g., Postgres via MCP for amends; RAG for queries
