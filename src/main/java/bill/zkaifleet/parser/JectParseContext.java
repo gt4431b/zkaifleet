@@ -45,7 +45,7 @@ public class JectParseContext {
 			if ( raw instanceof Map ) {
 				Map <String, Object> rawMap = ( Map <String, Object> ) raw ;
 				for ( String predicateName : rawMap.keySet ( ) ) {
-					Predicate pred = ontologyRegistry.getPredicate ( predicateName ) ;
+					Predicate pred = ontologyRegistry.getPredicate ( predicateName, ontologyName ) ;
 					PredicateQualifier qualifier = pred.qualifier ( ) ;
 					Object value = rawMap.get ( predicateName ) ;
 					if ( value instanceof Map ) {
@@ -174,6 +174,7 @@ public class JectParseContext {
 
 	public void resolveAll ( ) {
 		// Third pass logic: Iterate and swap placeholders
+		
 	}
 
 	public boolean hasSeen ( String id ) {

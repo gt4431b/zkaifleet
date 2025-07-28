@@ -9,6 +9,8 @@ import lombok.Getter ;
 import lombok.Setter ;
 import lombok.EqualsAndHashCode ;
 
+import java.lang.reflect.InvocationTargetException ;
+import java.lang.reflect.Method ;
 import java.util.* ;
 
 @Getter
@@ -131,7 +133,23 @@ public abstract class Ject {
 		// If the predicate has a qualifier, we could also handle it here
 		// For example, if pred.qualifier() is not null, we might want to do something specific
 		// This is commented out as it depends on the specific use case
-		// if ( pred.qualifier ( ) != null ) {
-//		pred.qualifier ( ).setter ( ).accept ( scalar, this ) ;
+		if ( pred.qualifier ( ) != null && pred.qualifier ( ).setter ( ) != null ) {
+			// If the predicate has a setter, we can use it to set the scalar value
+			pred.qualifier ( ).setter ( ).accept ( scalar, this ) ;
+		} else {
+			if ( ! attemptSet ( pred, scalar, "set" ) ) {
+				attemptSet ( pred, scalar, "add" ) ;
+			}
+		}
+	}
+
+	private boolean attemptSet ( Predicate pred, Object scalar, String m ) {
+		try {
+			Method setter = getClass ( ).getMethod ( m + pred.name ( ).substring ( 0, 1 ).toUpperCase ( ) + pred.name ( ).substring ( 1 ), scalar.getClass ( ) ) ;
+			setter.invoke ( this, scalar ) ;
+			return true ;
+		} catch ( NoSuchMethodException | SecurityException | IllegalAccessException | InvocationTargetException e ) {
+			return false ; // Method not found or invocation failed
+		}
 	}
 }

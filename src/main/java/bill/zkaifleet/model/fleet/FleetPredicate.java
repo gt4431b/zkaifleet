@@ -9,14 +9,14 @@ import bill.zkaifleet.model.PredicateQualifier ;
 //Enum for first-class Predicates (expanded for ontology elements)
 public enum FleetPredicate implements Predicate {
 	// singleton, required, // pluralName, objectTypes, subjectTypes, scalarType
-	id ( new PredicateQualifier ( true, true, null, null, null, String.class, ( String s, Ject j ) -> j.setId ( s ) ) ),
+	id ( new PredicateQualifier ( true, true, null, null, null, String.class, ( Object s, Ject j ) -> j.setId ( ( String ) s ) ) ),
 	role ( new PredicateQualifier ( false, true, "roles", List.of ( FleetJect.class ), RoleJect.class, null, null ) ),
 	process ( new PredicateQualifier ( false, true, "processes", List.of ( FleetJect.class ), ProcessJect.class, null, null ) ),
 	wrunk ( new PredicateQualifier ( false, true, "wrunks", List.of ( FleetJect.class ), WrunkJect.class, null, null ) ),
 	integration ( new PredicateQualifier ( false, true, "integrations", List.of ( FleetJect.class ), IntegrationJect.class, null, null ) ),
-	capability ( new PredicateQualifier ( false, true, "capabilities", List.of ( RoleJect.class ), null, String.class, ( String c, RoleJect f ) -> f.addCapability ( c ) ) ),
-	escalationPath ( new PredicateQualifier ( true, false, null, List.of ( BootstrapAgentJect.class, RoleJect.class ), null, String.class, ( String c, RoleJect f ) -> f.addEscalationPath ( c ) ) ),
-	confidenceThreshold ( new PredicateQualifier ( true, true, null, List.of ( ConstraintsJect.class ), null, Double.class, ( Double d, ConstraintsJect f ) -> f.setConfidenceThreshold ( d ) ) ),
+	capability ( new PredicateQualifier ( false, true, "capabilities", List.of ( RoleJect.class ), null, String.class, ( Object c, Ject f ) -> ( ( RoleJect ) f ).addCapability ( ( String ) c ) ) ),
+	escalationPath ( new PredicateQualifier ( true, false, null, List.of ( BootstrapAgentJect.class, RoleJect.class ), null, String.class, ( Object c, Ject f ) -> ( ( RoleJect ) f ).addEscalationPath ( ( String ) c ) ) ),
+	confidenceThreshold ( new PredicateQualifier ( true, true, null, List.of ( ConstraintsJect.class ), null, Double.class, ( Object d, Ject f ) -> ( ( ConstraintsJect ) f ).setConfidenceThreshold ( ( Double ) d ) ) ),
 	visionStatement ( new PredicateQualifier ( true, true, null, List.of ( FleetJect.class ), VisionStatementJect.class, null, null ) ),
 	humanIntervention ( new PredicateQualifier ( true, false, null, List.of ( FleetJect.class ), HumanInterventionJect.class, null, null ) ),
 	contact ( new PredicateQualifier ( false, true, "contacts", List.of ( HumanInterventionJect.class ), ContactJect.class, null, null ) ),

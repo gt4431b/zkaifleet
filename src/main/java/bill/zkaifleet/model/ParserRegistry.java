@@ -46,10 +46,10 @@ public class ParserRegistry {
 		}
 	}
 
-	public Predicate getPredicate ( String key ) {
+	public Predicate getPredicate ( String key, String ontologyName2 ) {
 		Predicate retVal = predicates.get(key);
 		if ( retVal == null ) {
-			retVal = new RuntimePredicate ( key, "unknown", ontologyName ) ;
+			retVal = new RuntimePredicate ( key, "unknown", ontologyName2 ) ;
 		}
 		return retVal ;
 	}
