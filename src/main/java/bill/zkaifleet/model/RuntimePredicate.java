@@ -1,4 +1,4 @@
-package bill.zkaifleet.model ;
+package bill.zkaifleet.model;
 
 import java.util.Collections ;
 
@@ -7,7 +7,22 @@ import java.util.Collections ;
 import com.fasterxml.jackson.annotation.JsonInclude ;
 import lombok.Data ;
 import lombok.EqualsAndHashCode ;
+import lombok.Getter ;
 
+/**
+ * A runtime-generated predicate that doesn't need to be pre-defined in a registry.
+ * <p>
+ * RuntimePredicates are created dynamically during parsing when a predicate name
+ * is encountered that doesn't match any registered predicate in the ontology registry.
+ * 
+ * <h2>Implementation Notes</h2>
+ * <ul>
+ *   <li>If a predicate doesn't exist, queries for that relationship should return null, not an empty RuntimePredicate</li>
+ *   <li>Predicate values should be homogeneous - cannot mix Ject types, nor Ject types with scalar types</li>
+ *   <li>Predicates act as the edges in the ontology graph, connecting Ject nodes</li>
+ *   <li>When creating RuntimePredicates, always ensure they have appropriate qualifiers to define subject and scalar types</li>
+ * </ul>
+ */
 @Data
 @EqualsAndHashCode
 @JsonInclude ( JsonInclude.Include.NON_NULL )
@@ -38,6 +53,8 @@ public class RuntimePredicate implements Predicate {
 
 	@Override
 	public PredicateQualifier qualifier ( ) {
-		return new PredicateQualifier ( false, false, null, Collections.emptyList ( ), RuntimeJect.class, null, null ) ;
+		return new PredicateQualifier ( false, false, null, 
+		                             Collections.singletonList ( RuntimeJect.class ), 
+		                             RuntimeJect.class, Object.class, null ) ;
 	}
 }

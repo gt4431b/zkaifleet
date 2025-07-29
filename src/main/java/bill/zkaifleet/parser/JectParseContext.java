@@ -17,9 +17,37 @@ import bill.zkaifleet.model.ParserRegistry ;
 import bill.zkaifleet.model.Predicate ;
 import bill.zkaifleet.model.PredicateQualifier ;
 import bill.zkaifleet.model.RuntimeJect ;
+import bill.zkaifleet.model.RuntimePredicate;
 import lombok.Data ;
+import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Context class for parsing YAML data into a graph of Ject objects.
+ * <p>
+ * JectParseContext is responsible for interpreting YAML data structures and
+ * converting them into a connected graph of Ject objects, maintaining references
+ * and resolving placeholders.
+ * 
+ * <h2>Implementation Notes</h2>
+ * <ul>
+ *   <li>Within YAML files, attribute names are used as predicates in the subject-predicate-object model</li>
+ *   <li>First-class Ject objects (like FleetJect) are preferred, but if unavailable, RuntimeJects 
+ *       and RuntimePredicates are used to build the graph</li>
+ *   <li>Predicate values should be homogeneous - cannot mix Ject types, nor Ject types with scalar types</li>
+ *   <li>Maps in YAML are never treated as scalars, but are interpreted as Jects</li>
+ *   <li>If a predicate doesn't exist, queries for that relationship should return null, not an empty RuntimePredicate</li>
+ *   <li>Placeholders are temporary objects that should only ever contain one scalar value (the id)</li>
+ *   <li>The raw data for parsing must be a Map&lt;String, Object&gt; as returned by YAML parsing.
+ *       Lists or scalar values cannot be directly used - they must be wrapped in a Map</li>
+ *   <li>When retrieving predicates or storing/retrieving values, always use the same predicate instance
+ *       to ensure consistent behavior. Prefer getting predicates from a registry rather than creating new instances</li>
+ *   <li>RuntimePredicates should always have appropriate qualifier configurations that specify both subject types
+ *       and scalar types to handle all possible values correctly</li>
+ *   <li>When testing, mock predicates must correctly implement qualifier() with appropriate subjectType and scalarType</li>
+ * </ul>
+ */
 @Data
+@Slf4j
 public class JectParseContext {
 
 	private final Map <String, Placeholder <Ject>> placeholders = new HashMap <> ( ) ;
@@ -29,6 +57,16 @@ public class JectParseContext {
 	private Visitor visitor = new Visitor ( ) ;
 	private Ontology ontology ;
 
+	/**
+	 * Creates a new JectParseContext for building Jects from raw data.
+	 * 
+	 * @param current The current Ject being processed, typically an Ontology instance
+	 * @param ontologyName The name of the ontology being processed
+	 * @param rawRemnants The raw data from YAML parsing to be processed into Jects.
+	 *                    IMPORTANT: This must always be a Map&lt;String, Object&gt; as returned by YAML parsing.
+	 *                    Lists or scalar values cannot be directly used here - they must be wrapped in a Map.
+	 * @param ontologyCatalog The catalog of parser registries used for resolving types
+	 */
 	public JectParseContext ( Ject current, String ontologyName, Map <String, Object> rawRemnants, Map <String, ParserRegistry> ontologyCatalog ) {
 		contextStack.push ( new LocalParseContext ( current, ontologyName, rawRemnants ) ) ;
 		this.ontologyCatalog = ontologyCatalog ;
@@ -50,6 +88,13 @@ public class JectParseContext {
 				Map <String, Object> rawMap = ( Map <String, Object> ) raw ;
 				for ( String predicateName : rawMap.keySet ( ) ) {
 					Predicate pred = ontologyRegistry.getPredicate ( predicateName, ontologyName ) ;
+					
+					// Handle null predicate by creating a RuntimePredicate
+					if (pred == null) {
+						pred = new RuntimePredicate(predicateName, "unknown", ontologyName);
+						log.debug("Created runtime predicate '{}' for ontology '{}'", predicateName, ontologyName);
+					}
+					
 					PredicateQualifier qualifier = pred.qualifier ( ) ;
 					Object value = rawMap.get ( predicateName ) ;
 					if ( value instanceof Map ) {
@@ -205,69 +250,130 @@ public class JectParseContext {
 
 	// Update in bill.zkaifleet.parser.OntologyParser (in resolveRelations, handle literal conversion in lists)
 	public void resolveRelations ( Ject ject ) {
+	    // Create a copy of the subjects to avoid concurrent modification
+	    Map<Predicate, List<Ject>> subjectsCopy = new HashMap<>(ject.getSubjects()) ;
+	    
 	    // Traverse and replace placeholders in subjects
-	    for (Map.Entry<Predicate, List<Ject>> entry : ject.getSubjects ( ).entrySet()) {
+	    for (Map.Entry<Predicate, List<Ject>> entry : subjectsCopy.entrySet()) {
 			boolean literals = false ;
 			boolean placeHolders = false ;
-	        List<Object> resolvedList = new ArrayList<>(); // Use Object to hold Jects or scalars
+			boolean jects = false ;
+	        List<Object> resolvedList = new ArrayList<>() ; // Use Object to hold Jects or scalars
 	        for (Ject item : entry.getValue()) {
-	            Object resolvedItem = item.resolveLiterals(); // Convert if literal
+	            Object resolvedItem = item.resolveLiterals() ; // Convert if literal
 	            if (resolvedItem instanceof Placeholder) {
 		        	placeHolders = true ;
-	                Placeholder<?> placeholder = (Placeholder<?>) resolvedItem;
+	                Placeholder<?> placeholder = (Placeholder<?>) resolvedItem ;
 	                if (placeholder.getResolved() != null) {
-	                    resolvedList.add(placeholder.getResolved().resolveLiterals());
+	                    resolvedList.add(placeholder.getResolved().resolveLiterals()) ;
 	                } else {
-	                    throw new IllegalStateException("Unresolved placeholder in relation: " + placeholder.getId());
+	                    throw new IllegalStateException("Unresolved placeholder in relation: " + placeholder.getId()) ;
 	                }
 	            } else if ( ! ( resolvedItem instanceof Ject ) ) {
 	                // If resolvedItem is not a Ject, treat it as a literal scalar
 	                // This is where we handle literals in the relation
 	            	literals = true ;
-	                resolvedList.add(resolvedItem);
+	                resolvedList.add(resolvedItem) ;
+	            } else {
+	                // Regular Ject object
+	                jects = true ;
+	                resolvedList.add(resolvedItem) ;
+	            }
+	            
+	            // Check for mixed content (Jects and literals in the same list)
+	            if ((literals && jects) || (literals && placeHolders)) {
+	                throw new IllegalStateException("Mixed content detected in list for predicate: " + entry.getKey().name() +
+	                        ". Lists must contain either all Jects or all scalar values.") ;
 	            }
 	        }
 
 	        if ( placeHolders && literals ) {
-	        	throw new IllegalStateException("Cannot mix Jects and literals in the same relation: " + entry.getKey().name());
-	        } else if ( placeHolders ) {
-	        	List<Ject> resolvedJects = (List<Ject>) resolvedList.stream().filter(Ject.class::isInstance).map ( j -> ( Ject ) j ).toList ( ) ;
-	        	entry.setValue(resolvedJects ) ; // For now, filter scalars if not Ject; evolve as needed
-	        	for ( Ject jectItem : resolvedJects ) {
-	        		jectItem.addIsObjectOf ( entry.getKey ( ), ject ) ; // Add back the relation to the original Ject
-	        	}
+	        	throw new IllegalStateException("Cannot mix Jects and literals in the same relation: " + entry.getKey().name()) ;
 	        } else if ( literals ) {
 	        	ject.setScalars ( entry.getKey ( ), resolvedList ) ; // If all scalars, add as scalar
 	        	ject.removeTypedSubjects ( entry.getKey ( ) ) ; // Remove the relation if only scalars
+	        } else {
+	        	List<Ject> resolvedJects = new ArrayList<>() ;
+	        	for (Object obj : resolvedList) {
+	        	    if (obj instanceof Ject jectObj) {
+	        	        resolvedJects.add(jectObj) ;
+	        	    } else if (obj instanceof Map) {
+	        	        // If we encounter a Map that's not a Ject, that's an error - we don't allow mixed content
+	        	        throw new IllegalStateException("Mixed content detected in list for predicate: " + entry.getKey().name() +
+	        	                ". Found a Map that is not a Ject object.") ;
+	        	    }
+	        	}
+	        	
+	        	// Replace the original list
+	        	if (ject.getSubjects().containsKey(entry.getKey())) {
+	        	    ject.getSubjects().put(entry.getKey(), new ArrayList<>(resolvedJects)) ;
+	        	    
+	        	    // Update back references
+	        	    for (Ject jectItem : resolvedJects) {
+	        	        jectItem.addIsObjectOf(entry.getKey(), ject) ;
+	        	    }
+	        	}
 	        }
 	    }
 
+	    // Create a copy of isObjectOf to avoid concurrent modification
+	    Map<Predicate, List<Ject>> isObjectOfCopy = new HashMap<>(ject.getIsObjectOf()) ;
+	    
 	    // Similarly for isObjectOf
-	    for (Map.Entry<Predicate, List<Ject>> entry : ject.getIsObjectOf ( ).entrySet()) {
+	    for (Map.Entry<Predicate, List<Ject>> entry : isObjectOfCopy.entrySet()) {
 			boolean literals = false ;
 			boolean jects = false ;
-	        List<Object> resolvedList = new ArrayList<>();
+	        List<Object> resolvedList = new ArrayList<>() ;
 	        for (Ject item : entry.getValue()) {
-	            Object resolvedItem = item.resolveLiterals();
+	            Object resolvedItem = item.resolveLiterals() ;
 	            if (resolvedItem instanceof Placeholder) {
 	            	jects = true ;
-	                Placeholder<?> placeholder = (Placeholder<?>) resolvedItem;
+	                Placeholder<?> placeholder = (Placeholder<?>) resolvedItem ;
 	                if (placeholder.getResolved() != null) {
-	                    resolvedList.add(placeholder.getResolved().resolveLiterals());
+	                    resolvedList.add(placeholder.getResolved().resolveLiterals()) ;
 	                } else {
-	                    throw new IllegalStateException("Unresolved placeholder in isObjectOf: " + placeholder.getId());
+	                    throw new IllegalStateException("Unresolved placeholder in isObjectOf: " + placeholder.getId()) ;
 	                }
 	            } else if ( ! ( resolvedItem instanceof Ject ) ) {
 	            	literals = true ;
-	                resolvedList.add(resolvedItem);
+	                resolvedList.add(resolvedItem) ;
+	            } else {
+	                // Regular Ject object
+	                jects = true ;
+	                resolvedList.add(resolvedItem) ;
+	            }
+	            
+	            // Check for mixed content in isObjectOf
+	            if (literals && jects) {
+	                throw new IllegalStateException("Mixed content detected in isObjectOf list for predicate: " + 
+	                        entry.getKey().name() + ". Lists must contain either all Jects or all scalar values.") ;
 	            }
 	        }
+	        
 	        if ( jects && literals ) {
-	        	throw new IllegalStateException("Cannot mix Jects and literals in the same isObjectOf relation: " + entry.getKey().name());
-	        } else if ( jects ) {
-	        	entry.setValue((List<Ject>) resolvedList.stream().filter(Ject.class::isInstance).map ( j -> ( Ject ) j ).toList ( ) ) ;
+	        	throw new IllegalStateException("Cannot mix Jects and literals in the same isObjectOf relation: " + entry.getKey().name()) ;
 	        } else if ( literals ) {
 	        	ject.setScalars ( entry.getKey ( ), resolvedList ) ; // If all scalars, add as scalar
+	        	// Also remove from isObjectOf
+	        	if (ject.getIsObjectOf().containsKey(entry.getKey())) {
+	        	    ject.getIsObjectOf().remove(entry.getKey()) ;
+	        	}
+	        } else {
+	        	List<Ject> resolvedJects = new ArrayList<>() ;
+	        	for (Object obj : resolvedList) {
+	        	    if (obj instanceof Ject jectObj) {
+	        	        resolvedJects.add(jectObj) ;
+	        	    } else if (obj instanceof Map) {
+	        	        // If we encounter a Map that's not a Ject, that's an error
+	        	        throw new IllegalStateException("Mixed content detected in isObjectOf list for predicate: " + 
+	        	                entry.getKey().name() + ". Found a Map that is not a Ject object.") ;
+	        	    }
+	        	}
+	        	
+	        	// Replace the original list
+	        	if (ject.getIsObjectOf().containsKey(entry.getKey())) {
+	        	    ject.getIsObjectOf().put(entry.getKey(), new ArrayList<>(resolvedJects)) ;
+	        	}
 	        }
 	    }
 	}
