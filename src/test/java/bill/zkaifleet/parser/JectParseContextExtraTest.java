@@ -213,7 +213,8 @@ public class JectParseContextExtraTest {
         ontology.addScalar(testRegistry.getPredicate("items", "test"), testList);
         
         // Now verify we can retrieve the scalar list we just added
-        List<String> retrievedList = ontology.getScalar(testRegistry.getPredicate("items", "test"), List.class);
+        @SuppressWarnings ( "unchecked" )
+		List<String> retrievedList = ontology.getScalar(testRegistry.getPredicate("items", "test"), List.class);
         assertNotNull(retrievedList, "Scalar list should not be null");
         assertEquals(1, retrievedList.size());
         assertEquals("test item", retrievedList.get(0));

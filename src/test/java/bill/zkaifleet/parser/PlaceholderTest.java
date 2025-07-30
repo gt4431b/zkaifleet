@@ -1,8 +1,6 @@
 package bill.zkaifleet.parser;
 
 import bill.zkaifleet.model.BasePredicate;
-import bill.zkaifleet.model.Ject;
-import bill.zkaifleet.model.Predicate;
 import bill.zkaifleet.model.RuntimeJect;
 import org.junit.jupiter.api.Test;
 

@@ -3,13 +3,9 @@ package bill.zkaifleet.model.fleet;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 
-import bill.zkaifleet.model.Ject;
-import bill.zkaifleet.model.Ontology;
 import bill.zkaifleet.model.PredicateQualifier;
 
 import static org.junit.jupiter.api.Assertions.*;
-
-import java.util.List;
 
 @QuarkusTest
 public class FleetPredicateTest {

@@ -7,7 +7,6 @@ import java.util.Collections ;
 import com.fasterxml.jackson.annotation.JsonInclude ;
 import lombok.Data ;
 import lombok.EqualsAndHashCode ;
-import lombok.Getter ;
 
 /**
  * A runtime-generated predicate that doesn't need to be pre-defined in a registry.
